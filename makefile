@@ -97,7 +97,7 @@ obj/mains/%.o : mains/%.cpp
 
 .PHONY: app
 app: $(OBJS) obj/mains/main.o
-	g++ ${CFLAGS} -o build/main obj/mains/main.o $< $(LDFLAGS)
+	g++ ${CFLAGS} -o build/main $^ $(LDFLAGS)
 
 # use this when packaging to get all the dll-s used
 .PHONY: grab_dlls
