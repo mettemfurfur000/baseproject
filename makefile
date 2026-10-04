@@ -139,3 +139,4 @@ build/$(ABI_MAIN): $(ABI_TEST_OBJ) $(ABI_OBJ) $(OBJS)
 clean:
 	rm -rf build/*
 	rm -rf obj/*
+
