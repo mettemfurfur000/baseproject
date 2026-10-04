@@ -1,0 +1,19 @@
+[X] tnt bypasses face protection
+    did not test for shield protection yet since no clue how to make one in survival.
+[X] follow up: add user, developer and admin documentation
+
+[ ] tnt still breaks the block at the unprotected face, even if there is a block that protects it in the way that has its face well protected.
+    proper trace-ray needed? hmm
+
+    more detailed explanation - if we place all of the blocks on once axis, the front block has its protection face, facing the tnt, so it gets protected, but the block right behind that block that doesnt have the protection, gets destroyed, even though there is a block in front of it that got protected.
+
+
+[ ] when a block is moved by a sticky piston forward, the protection is moved correctly, but when the block is pulled by the piston back, the protection is gone.
+
+[X] debug helpers for the testers (and me):
+
+[X] add an overlay that draws protection outlines out of particles around faces of blocks that are protected. The color fades from green to red as durability reaches 0.
+[X] it is acceptable if there is 3 gradient points: 0 durability, copper tier, and iron tier. 
+[X] shield protection should be a different overlay, since 2 overlays active at the same time might be distracting or misleading... 
+
+[] admin tools to manage protection and shields, lookup information, memory usage, amount of protection tracked, shields, etc.

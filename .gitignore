@@ -7,3 +7,5 @@ out*
 # .vscode/*
 # .cache/*
 .*/*
+
+server/*

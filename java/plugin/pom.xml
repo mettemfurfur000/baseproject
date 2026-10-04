@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.tem.griefprot</groupId>
+  <artifactId>griefprot-plugin</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>griefprot</name>
+  <description>Face reinforcement and shield points for Paper, backed by the griefprot C library</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!--
+      Paper 26.1.2 ships Java 25 bytecode (verified: class file major 69), and
+      FFM is final there, so no preview flags and no extra module flags are
+      needed.
+
+      Maven rather than Gradle on purpose. Gradle 8.13 cannot run on a Java 25
+      JVM at all: its embedded Kotlin JavaVersion.parse throws on "25.0.2"
+      before the build starts. Expressing a Java 25 toolchain needs Gradle 9.1+,
+      and javac from an older JDK cannot target 25 either, so no Gradle version
+      available here can compile this.
+    -->
+    <maven.compiler.release>25</maven.compiler.release>
+    <paper.version>26.1.2.build.74-stable</paper.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>papermc</id>
+      <url>https://repo.papermc.io/repository/maven-public/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- Provided by the Paper server jar at runtime. -->
+    <dependency>
+      <groupId>io.papermc.paper</groupId>
+      <artifactId>paper-api</artifactId>
+      <version>${paper.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.4</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>${project.artifactId}-${project.version}</finalName>
+
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>plugin.yml</include>
+        </includes>
+      </resource>
+      <!--
+        The compiled shim is dropped in by scripts/build.sh, which calls
+        "make -C ../.. abi". It is shipped verbatim: FFM must load a real file
+        from disk, so it cannot live inside the jar as a resource and be read as
+        a blob. Filtered resources are kept separate so ${version} substitution
+        cannot corrupt a binary.
+      -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>plugin.yml</exclude>
+        </excludes>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

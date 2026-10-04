@@ -1,0 +1,16 @@
+name: griefprot
+version: '0.1.0-SNAPSHOT'
+main: com.tem.griefprot.GriefProtPlugin
+api-version: '26.1.2'
+description: Face reinforcement and shield points for blocks, backed by the griefprot C library.
+author: tem
+load: POSTWORLD
+commands:
+  griefprot:
+    description: Toggle a targeted protection debug overlay.
+    usage: /griefprot overlay <reinforcement|shield|off>
+    permission: griefprot.debug
+permissions:
+  griefprot.debug:
+    description: Use the GriefProt debug overlays.
+    default: op

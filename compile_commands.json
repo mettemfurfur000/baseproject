@@ -1,0 +1,78 @@
+[
+ {
+  "directory": "C:/msys64/home/tem/griefprot",
+  "arguments": [
+   "cc",
+   "-O0",
+   "-Wall",
+   "-Wextra",
+   "-g",
+   "-MMD",
+   "-IC:/msys64/home/tem/griefprot/include",
+   "-IC:/msys64/home/tem/griefprot/libs",
+   "-IC:/msys64/home/tem/griefprot/../temlib/include",
+   "-c",
+   "src/./griefprot_chunk.c",
+   "-o",
+   "obj/./griefprot_chunk.o"
+  ],
+  "file": "src/./griefprot_chunk.c"
+ },
+ {
+  "directory": "C:/msys64/home/tem/griefprot",
+  "arguments": [
+   "cc",
+   "-O0",
+   "-Wall",
+   "-Wextra",
+   "-g",
+   "-MMD",
+   "-IC:/msys64/home/tem/griefprot/include",
+   "-IC:/msys64/home/tem/griefprot/libs",
+   "-IC:/msys64/home/tem/griefprot/../temlib/include",
+   "-c",
+   "src/./griefprot_config.c",
+   "-o",
+   "obj/./griefprot_config.o"
+  ],
+  "file": "src/./griefprot_config.c"
+ },
+ {
+  "directory": "C:/msys64/home/tem/griefprot",
+  "arguments": [
+   "cc",
+   "-O0",
+   "-Wall",
+   "-Wextra",
+   "-g",
+   "-MMD",
+   "-IC:/msys64/home/tem/griefprot/include",
+   "-IC:/msys64/home/tem/griefprot/libs",
+   "-IC:/msys64/home/tem/griefprot/../temlib/include",
+   "-c",
+   "src/./griefprot_sparse.c",
+   "-o",
+   "obj/./griefprot_sparse.o"
+  ],
+  "file": "src/./griefprot_sparse.c"
+ },
+ {
+  "directory": "C:/msys64/home/tem/griefprot",
+  "arguments": [
+   "cc",
+   "-O0",
+   "-Wall",
+   "-Wextra",
+   "-g",
+   "-MMD",
+   "-IC:/msys64/home/tem/griefprot/include",
+   "-IC:/msys64/home/tem/griefprot/libs",
+   "-IC:/msys64/home/tem/griefprot/../temlib/include",
+   "-c",
+   "mains/test.c",
+   "-o",
+   "obj/mains/test.o"
+  ],
+  "file": "mains/test.c"
+ }
+]

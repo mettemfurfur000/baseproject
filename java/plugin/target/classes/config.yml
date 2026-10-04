@@ -1,0 +1,44 @@
+# griefprot
+#
+# Reinforce the faces of blocks, and place shields that cover an area for a while.
+#
+# All of the numeric values below are passed to the native library at startup and
+# read back afterwards. A value the library clamps is logged as a startup warning
+# rather than silently ignored, so if something here does not behave as written,
+# check the server log first.
+
+# How many faces of one block may carry reinforcement at once. The underlying
+# record has four slots, so anything above 4 is refused by the library.
+max-faces-per-block: 4
+
+# Reinforcement durability, in break events. A face must hold more than the break
+# it is absorbing, so one copper plate (32) stops 31 breaks, not 32.
+copper-breaks: 32
+iron-breaks: 256
+
+# The value handed to the native store when a player reinforces a face. This is
+# what decides whether a new plate is an upgrade: an equal or weaker value is
+# refused, so plates never stack.
+copper-tier-points: 32
+iron-tier-points: 256
+
+# Materials that may carry reinforcement. Leave empty to allow every solid block.
+protectable-materials: []
+
+# Shield blocks.
+shield-pool: 4096
+shield-regen-seconds: 20
+shield-window-seconds: 300
+shield-range: 4
+shield-max-targets: 64
+shield-fuel-max: 64
+shield-fuel-per-second: 1
+
+# How many shield points a covering shield hands out per window.
+shield-points-per-window: 1
+
+# Shield points on a block that no shield is covering decay away after this long.
+# Set it comfortably above the longest gap between shield windows, or protection
+# will lapse while a shield is still recharging.
+decay-interval-seconds: 300
+decay-amount: 1
