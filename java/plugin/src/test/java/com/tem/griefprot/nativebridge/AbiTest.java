@@ -343,6 +343,31 @@ class AbiTest {
     }
 
     @Test
+    @DisplayName("protection on an unblocked face travels with a pulled block")
+    void pullingBlockCarriesProtectionOnThePistonSide() {
+        int w = newWorld();
+        abi.chunkAt(w, 0, 64, 0);
+        abi.reinfAdd(w, 2, 64, 0, abi.faceUp(), 32);
+
+        assertTrue(abi.moveBlock(w, 2, 64, 0, 1, 64, 0, abi.faceWest()));
+        assertEquals(0, abi.reinfFaceCount(w, 2, 64, 0), "source should be empty");
+        assertEquals(32, abi.reinfFaceDurability(w, 1, 64, 0, abi.faceUp()));
+    }
+
+    @Test
+    @DisplayName("a piston cannot move a block into a reinforced destination face")
+    void movementIntoProtectedFaceIsRefused() {
+        int w = newWorld();
+        abi.chunkAt(w, 0, 64, 0);
+        abi.reinfAdd(w, 1, 64, 0, abi.faceUp(), 8);
+        abi.reinfAdd(w, 2, 64, 0, abi.faceWest(), 32);
+
+        assertFalse(abi.moveBlock(w, 1, 64, 0, 2, 64, 0, abi.faceEast()));
+        assertEquals(8, abi.reinfFaceDurability(w, 1, 64, 0, abi.faceUp()), "source must remain unchanged");
+        assertEquals(32, abi.reinfFaceDurability(w, 2, 64, 0, abi.faceWest()), "destination protection must remain");
+    }
+
+    @Test
     @DisplayName("a shield reports its position and can be ticked")
     void shieldTicks() {
         int w = newWorld();

@@ -1149,10 +1149,8 @@ static void test_world_move_across_chunks(void)
 	gp_world_destroy(w);
 }
 
-/* The side a block was pushed or pulled from must not be protected, otherwise
-   whatever relies on that face is left with a hole. A block shoved east came off
-   its west side, so a west face reinforcement blocks the move. */
-static void test_world_move_refuses_protected_source_side(void)
+/* Reinforcement on a side other than the one a block leaves travels with it. */
+static void test_world_move_carries_non_source_protection(void)
 {
 	gp_config cfg;
 	gp_config_defaults(&cfg);
@@ -1161,28 +1159,69 @@ static void test_world_move_refuses_protected_source_side(void)
 	gp_world_set_config(w, &cfg);
 
 	gp_chunk_reinf *c = gp_world_chunk(w, 0, 0);
-	gp_chunk_reinf_add(c, 4, 64, 4, GP_FACE_WEST, 32);
-	gp_chunk_reinf_add(c, 4, 64, 4, GP_FACE_UP, 16);
+	gp_chunk_reinf_add(c, 4, 64, 4, GP_FACE_UP, 32);
+	gp_chunk_reinf_add(c, 4, 64, 4, GP_FACE_NORTH, 16);
+	gp_chunk_reinf_add(c, 8, 64, 4, GP_FACE_UP, 24);
+
+	gp_pos pull_from = {.x = 4, .y = 64, .z = 4};
+	gp_pos pull_to = {.x = 3, .y = 64, .z = 4};
+	gp_pos push_from = {.x = 8, .y = 64, .z = 4};
+	gp_pos push_to = {.x = 9, .y = 64, .z = 4};
+
+	CHECK(gp_world_move_block(w, pull_from, pull_to, GP_FACE_WEST));
+	CHECK(gp_world_move_block(w, push_from, push_to, GP_FACE_EAST));
+
+	gp_block_reinf_t state;
+	CHECK(gp_chunk_reinf_get(c, 3, 64, 4, &state));
+	CHECK(state.count == 2);
+	CHECK(state.face[0] == GP_FACE_UP && state.durability[0] == 32);
+	CHECK(state.face[1] == GP_FACE_NORTH && state.durability[1] == 16);
+	CHECK(!gp_chunk_reinf_get(c, 4, 64, 4, &state));
+
+	CHECK(gp_chunk_reinf_get(c, 9, 64, 4, &state));
+	CHECK(state.count == 1);
+	CHECK(state.face[0] == GP_FACE_UP && state.durability[0] == 24);
+	CHECK(!gp_chunk_reinf_get(c, 8, 64, 4, &state));
+
+	// a bogus direction is rejected
+	CHECK(!gp_world_move_block(w, pull_from, pull_to, GP_FACE_NONE));
+
+	gp_world_destroy(w);
+}
+
+/* A moving block cannot enter a reinforced face, whether the mover itself is
+   protected or not. A rejected move must leave both positions unchanged. */
+static void test_world_move_refuses_protected_destination_face(void)
+{
+	gp_config cfg;
+	gp_config_defaults(&cfg);
+
+	gp_world *w = gp_world_create();
+	gp_world_set_config(w, &cfg);
+	gp_chunk_reinf *chunk = gp_world_chunk(w, 0, 0);
+	gp_chunk_reinf_add(chunk, 4, 64, 4, GP_FACE_UP, 8);
+	gp_chunk_reinf_add(chunk, 5, 64, 4, GP_FACE_WEST, 32);
 
 	gp_pos from = {.x = 4, .y = 64, .z = 4};
 	gp_pos to = {.x = 5, .y = 64, .z = 4};
-
-	// travelling east means it came off the west face, which is protected
 	CHECK(!gp_world_move_block(w, from, to, GP_FACE_EAST));
 
-	// protection is untouched by the refusal
 	gp_block_reinf_t state;
-	CHECK(gp_chunk_reinf_get(c, 4, 64, 4, &state));
-	CHECK(state.count == 2);
-	CHECK(c->reinf_entries == 1);
+	CHECK(gp_chunk_reinf_get(chunk, 4, 64, 4, &state));
+	CHECK(state.count == 1);
+	CHECK(state.face[0] == GP_FACE_UP && state.durability[0] == 8);
+	CHECK(gp_chunk_reinf_get(chunk, 5, 64, 4, &state));
+	CHECK(state.count == 1);
+	CHECK(state.face[0] == GP_FACE_WEST && state.durability[0] == 32);
 
-	// travelling north came off the south face, which is free
-	CHECK(gp_world_move_block(w, from, (gp_pos){.x = 4, .y = 64, .z = 5}, GP_FACE_NORTH));
-	CHECK(gp_chunk_reinf_get(c, 4, 64, 5, &state));
-	CHECK(state.count == 2);
-
-	// a bogus direction is rejected
-	CHECK(!gp_world_move_block(w, from, to, GP_FACE_NONE));
+	// This pull's destination face points east, toward its source.
+	gp_chunk_reinf_clear(chunk, 5, 64, 4);
+	CHECK(gp_chunk_reinf_add(chunk, 3, 64, 4, GP_FACE_EAST, 24));
+	CHECK(!gp_world_move_block(w, from, (gp_pos){.x = 3, .y = 64, .z = 4}, GP_FACE_WEST));
+	CHECK(gp_chunk_reinf_get(chunk, 4, 64, 4, &state));
+	CHECK(gp_chunk_reinf_get(chunk, 3, 64, 4, &state));
+	CHECK(state.count == 1);
+	CHECK(state.face[0] == GP_FACE_EAST && state.durability[0] == 24);
 
 	gp_world_destroy(w);
 }
@@ -1447,7 +1486,8 @@ int main(void)
 	test_reinf_move_refuses_overflow();
 	test_shield_move_follows_block();
 	test_world_move_across_chunks();
-	test_world_move_refuses_protected_source_side();
+	test_world_move_carries_non_source_protection();
+	test_world_move_refuses_protected_destination_face();
 	test_world_move_refuses_cross_chunk_overflow();
 	test_world_move_without_protection();
 	test_shield_cover_decay();

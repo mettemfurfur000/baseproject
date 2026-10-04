@@ -290,10 +290,11 @@ static void test_movement(void)
 	CHECK(gp_abi_points_get(w, 1, 64, 0) == 12);
 	CHECK(gp_abi_reinf_face_durability(w, 0, 64, 0, gp_abi_face_up()) == 0);
 
-	// reinforce the west face, so pushing east again must be refused
-	CHECK(gp_abi_reinf_add(w, 1, 64, 0, gp_abi_face_west(), 50) == 1);
-	CHECK(gp_abi_move_block(w, 1, 64, 0, 2, 64, 0, gp_abi_face_east()) == 0);
-	CHECK(gp_abi_reinf_face_durability(w, 1, 64, 0, gp_abi_face_west()) == 50);
+	// The host checks piston source-face policy; the store still moves faces.
+	CHECK(gp_abi_reinf_add(w, 1, 64, 0, gp_abi_face_east(), 50) == 1);
+	CHECK(gp_abi_move_block(w, 1, 64, 0, 2, 64, 0, gp_abi_face_east()) == 1);
+	CHECK(gp_abi_reinf_face_durability(w, 2, 64, 0, gp_abi_face_east()) == 50);
+	CHECK(gp_abi_reinf_face_durability(w, 1, 64, 0, gp_abi_face_east()) == 0);
 
 	// a nonsense motion is refused rather than interpreted
 	CHECK(gp_abi_move_block(w, 1, 64, 0, 2, 64, 0, 99) == 0);

@@ -321,27 +321,6 @@ u64 gp_world_memory(const gp_world *world)
 
 /* --- block movement --------------------------------------------------------- */
 
-static gp_face_t face_opposite(gp_face_t face)
-{
-	switch (face)
-	{
-	case GP_FACE_DOWN:
-		return GP_FACE_UP;
-	case GP_FACE_UP:
-		return GP_FACE_DOWN;
-	case GP_FACE_NORTH:
-		return GP_FACE_SOUTH;
-	case GP_FACE_SOUTH:
-		return GP_FACE_NORTH;
-	case GP_FACE_WEST:
-		return GP_FACE_EAST;
-	case GP_FACE_EAST:
-		return GP_FACE_WEST;
-	default:
-		return GP_FACE_NONE;
-	}
-}
-
 void gp_world_shield_cover(void *user, gp_pos pos, u64 now)
 {
 	gp_world *world = (gp_world *)user;
@@ -378,6 +357,27 @@ static bool locate(const gp_world *world, gp_pos pos, i32 *cx, i32 *cz, u32 *lx,
 	return gp_world_pos_to_local(pos, (i32)world->cfg.chunk_height, cx, cz, lx, ly, lz);
 }
 
+static gp_face_t face_opposite(gp_face_t face)
+{
+	switch (face)
+	{
+	case GP_FACE_DOWN:
+		return GP_FACE_UP;
+	case GP_FACE_UP:
+		return GP_FACE_DOWN;
+	case GP_FACE_NORTH:
+		return GP_FACE_SOUTH;
+	case GP_FACE_SOUTH:
+		return GP_FACE_NORTH;
+	case GP_FACE_WEST:
+		return GP_FACE_EAST;
+	case GP_FACE_EAST:
+		return GP_FACE_WEST;
+	default:
+		return GP_FACE_NONE;
+	}
+}
+
 bool gp_world_move_block(gp_world *world, gp_pos from, gp_pos to, gp_face_t motion)
 {
 	if (!world || motion <= GP_FACE_NONE || motion >= GP_FACE_COUNT)
@@ -395,6 +395,17 @@ bool gp_world_move_block(gp_world *world, gp_pos from, gp_pos to, gp_face_t moti
 	if (!locate(world, to, &tcx, &tcz, &tx, &ty, &tz))
 		return false;
 
+	gp_chunk_reinf *dst = gp_world_find_chunk(world, tcx, tcz);
+	gp_face_t entered_face = face_opposite(motion);
+	if (dst && entered_face != GP_FACE_NONE)
+	{
+		gp_block_reinf_t destination;
+		if (gp_chunk_reinf_get(dst, tx, ty, tz, &destination))
+			for (u32 i = 0; i < GP_MAX_REINFORCED_FACES; i++)
+				if (destination.face[i] == entered_face)
+					return false; // do not move into a protected face
+	}
+
 	gp_chunk_reinf *src = gp_world_find_chunk(world, fcx, fcz);
 	if (!src)
 		return true; // the source chunk holds no protection to move
@@ -406,19 +417,9 @@ bool gp_world_move_block(gp_world *world, gp_pos from, gp_pos to, gp_face_t moti
 	if (!has_reinf && points == 0)
 		return true; // nothing to carry, so nothing to decide
 
-	if (has_reinf)
-	{
-		// the side the block came off must not be protected, otherwise whatever
-		// relies on that face is left with a hole where the block used to be
-		gp_face_t source_face = face_opposite(motion);
-		for (u32 i = 0; i < GP_MAX_REINFORCED_FACES; i++)
-			if (moved.face[i] == source_face)
-				return false;
-	}
-
 	// the destination chunk is created on demand: landing somewhere that has
 	// never been loaded is legitimate
-	gp_chunk_reinf *dst = gp_world_chunk(world, tcx, tcz);
+	dst = gp_world_chunk(world, tcx, tcz);
 	if (!dst)
 		return false;
 

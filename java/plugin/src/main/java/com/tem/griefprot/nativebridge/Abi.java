@@ -649,8 +649,8 @@ public final class Abi {
     /**
      * Moves one block's protection.
      *
-     * @param motion face id for the direction the block travels, matching
-     *     {@code BlockPistonExtendEvent#getDirection}
+     * @param motion face id for the direction the block travels, matching the
+     *     piston event's {@code getDirection()}
      */
     public boolean moveBlock(int world, int fromX, int fromY, int fromZ, int toX, int toY, int toZ, int motion) {
         try {

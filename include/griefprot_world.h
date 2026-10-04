@@ -86,14 +86,15 @@ u64 gp_world_memory(const gp_world *world);
    Returns false, changing nothing, when:
 
    - `motion` is not a real face, or either position is outside the world
-   - the side being pushed or pulled from currently carries reinforcement, since
-     something is relying on that protection staying put
+   - the destination block's face entered by the moving block is reinforced
    - the destination's faces plus the incoming ones would need more than
      `cfg.max_faces_per_block` distinct faces
 
    On success reinforcement keeps its world space direction, since a piston
    translates a block without rotating it, durability on a shared face is summed,
-   and shield points travel with the block. Cross chunk moves are handled here;
+   and shield points travel with the block. The host event handler is responsible
+   for rejecting motion away from protected source faces, since push and pull
+   events use different face semantics. Cross chunk moves are handled here;
    `gp_chunk_reinf_move` and `gp_chunk_shield_move` only cover one chunk.
 
    A move between two positions with no protection at all is a no-op that still

@@ -1,4 +1,5 @@
 com\tem\griefprot\nativebridge\AbiTest.class
+com\tem\griefprot\PistonListenerTest.class
 com\tem\griefprot\nativebridge\AbiTest$FaceId.class
 com\tem\griefprot\DebugOverlayTest.class
 com\tem\griefprot\ExplosionListenerTest.class

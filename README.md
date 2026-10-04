@@ -70,6 +70,17 @@ Breaking a block resolves in a fixed order: a reinforced face absorbs the break
 first, and only an unprotected face falls through to shield points. So a block
 can have reinforcement, shield points, both, or neither.
 
+Piston pushes and sticky-piston pulls move reinforcement and shield points with
+the block, including protection on the face nearest the piston. Protection is
+not left behind at the block's old coordinates. If the protection store refuses
+a move, for example because the destination would exceed its reinforced-face
+limit, the piston event is cancelled rather than moving the block without its
+protection; any earlier protection transfers in the same piston event are rolled
+back. A move is also refused when it would enter another block's reinforced face,
+preventing pistons from forcing blocks past a protected wall. Source-face checks
+are event-specific: extensions guard the face opposite travel, while retractions
+guard the face matching travel. Air blocks are not valid reinforcement targets.
+
 Explosions use that same resolution for each affected block. The face nearest
 the explosion origin is checked first; reinforcement absorbs the hit before
 shield points. A protected block is removed from the explosion's affected list,

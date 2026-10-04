@@ -201,7 +201,7 @@ uint32_t gp_abi_points_take(gp_h_world world, int32_t x, int32_t y, int32_t z, u
 
 /*
  * Moves one block's protection. `motion` is the direction the block travels,
- * matching BlockPistonExtendEvent.getDirection. Returns 1 on success, 0 when
+ * matching the piston event's getDirection. Returns 1 on success, 0 when
  * refused, in which case nothing was changed.
  */
 int gp_abi_move_block(gp_h_world world, int32_t from_x, int32_t from_y, int32_t from_z, int32_t to_x,

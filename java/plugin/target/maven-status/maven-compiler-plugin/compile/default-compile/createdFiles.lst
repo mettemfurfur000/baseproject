@@ -29,5 +29,6 @@ com\tem\griefprot\ExplosionListener$FaceConsumption.class
 com\tem\griefprot\nativebridge\Abi.class
 com\tem\griefprot\world\GriefWorld.class
 com\tem\griefprot\world\WorldPolicy.class
+com\tem\griefprot\PistonListener$Move.class
 com\tem\griefprot\HostSink.class
 com\tem\griefprot\Faces.class

@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -69,7 +68,9 @@ public final class InteractListener implements Listener {
         if (world == null) {
             return;
         }
-        if (!(world.policy() instanceof BukkitWorldPolicy policy) || !policy.isProtectable(block)) {
+        if (block.getType().isAir()
+                || !(world.policy() instanceof BukkitWorldPolicy policy)
+                || !policy.isProtectable(block)) {
             return;
         }
 
