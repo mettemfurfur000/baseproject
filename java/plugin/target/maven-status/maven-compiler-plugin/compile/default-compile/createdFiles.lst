@@ -1,5 +1,6 @@
 com\tem\griefprot\DebugOverlay.class
 com\tem\griefprot\DebugOverlay$1.class
+com\tem\griefprot\ExplosionListener$BlockAudit.class
 com\tem\griefprot\BreakFaces.class
 com\tem\griefprot\nativebridge\NativeLib.class
 com\tem\griefprot\config\ConfigLoader.class
@@ -17,11 +18,14 @@ com\tem\griefprot\DebugOverlay$Mode.class
 com\tem\griefprot\nativebridge\DecayResult.class
 com\tem\griefprot\ExplosionListener.class
 com\tem\griefprot\ChunkListener.class
+com\tem\griefprot\ExplosionListener$FacePosition.class
+com\tem\griefprot\ExplosionListener$RayPath.class
 com\tem\griefprot\nativebridge\WorldConfig.class
 com\tem\griefprot\ShieldTicker.class
 com\tem\griefprot\InteractListener.class
 com\tem\griefprot\nativebridge\ShieldState.class
 com\tem\griefprot\BreakFaces$Entry.class
+com\tem\griefprot\ExplosionListener$FaceConsumption.class
 com\tem\griefprot\nativebridge\Abi.class
 com\tem\griefprot\world\GriefWorld.class
 com\tem\griefprot\world\WorldPolicy.class

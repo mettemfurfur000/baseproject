@@ -18,12 +18,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 /**
- * Applies reinforcement when a player right-clicks a block face with a reinforcement item.
+ * Applies reinforcement when a player right-clicks a block face with a
+ * reinforcement item.
  *
- * <p>Reinforcement is upgrade only. An item equal to or weaker than what the
+ * <p>
+ * Reinforcement is upgrade only. An item equal to or weaker than what the
  * face already carries is refused, and nothing is spent.
  *
- * <p>The block face comes from {@code PlayerInteractEvent#getBlockFace}, which is
+ * <p>
+ * The block face comes from {@code PlayerInteractEvent#getBlockFace}, which is
  * the side of the block the player was aiming at, so reinforcing the top of a
  * chest does not reinforce the front.
  */
@@ -51,6 +54,10 @@ public final class InteractListener implements Listener {
             return;
         }
         Player player = event.getPlayer();
+
+        if (event.getItem() == null)
+            return;
+
         Material held = event.getItem().getType();
 
         int points = tierFor(held);
@@ -78,8 +85,8 @@ public final class InteractListener implements Listener {
         }
 
         player.sendMessage(Component.text(
-                        "Reinforced the " + plugin.faces().describe(face) + " face with "
-                                + held.name().toLowerCase(java.util.Locale.ROOT) + ".")
+                "Reinforced the " + plugin.faces().describe(face) + " face with "
+                        + held.name().toLowerCase(java.util.Locale.ROOT) + ".")
                 .color(NamedTextColor.GREEN));
 
         // Creative players keep the item so the mechanic can be explored
@@ -93,7 +100,8 @@ public final class InteractListener implements Listener {
     /**
      * Removes one reinforcement item.
      *
-     * <p>Handled explicitly rather than by cancelling the interaction, because the
+     * <p>
+     * Handled explicitly rather than by cancelling the interaction, because the
      * player is also right-clicking the block and that may have its own meaning.
      */
     private void consumeOne(Player player, Material held) {
@@ -124,7 +132,8 @@ public final class InteractListener implements Listener {
      * Keeps protection from surviving a block that was replaced by a piston or any
      * other means rather than by a player.
      *
-     * <p>Without this, a reinforced block that a piston shoves away would keep its
+     * <p>
+     * Without this, a reinforced block that a piston shoves away would keep its
      * record at the old coordinates, protecting whatever moved into them.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

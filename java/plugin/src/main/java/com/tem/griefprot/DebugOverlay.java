@@ -1,6 +1,7 @@
 package com.tem.griefprot;
 
 import com.tem.griefprot.world.GriefWorld;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.UUID;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
@@ -50,11 +52,12 @@ public final class DebugOverlay extends BukkitRunnable implements CommandExecuto
         Mode requested = switch (args[1].toLowerCase(java.util.Locale.ROOT)) {
             case "reinforcement" -> Mode.REINFORCEMENT;
             case "shield" -> Mode.SHIELD;
+            case "details" -> Mode.DETAILS;
             case "off" -> null;
             default -> null;
         };
         if (requested == null && !args[1].equalsIgnoreCase("off")) {
-            player.sendMessage("Usage: /griefprot overlay <reinforcement|shield|off>");
+            player.sendMessage("Usage: /griefprot overlay <reinforcement|shield|details|off>");
             return true;
         }
 
@@ -83,19 +86,62 @@ public final class DebugOverlay extends BukkitRunnable implements CommandExecuto
 
             Block block = player.getTargetBlockExact(8);
             if (block == null) {
+                if (mode == Mode.DETAILS) {
+                    player.sendActionBar(Component.empty());
+                }
                 continue;
             }
             GriefWorld world = plugin.grief(block);
             if (world == null) {
+                if (mode == Mode.DETAILS) {
+                    player.sendActionBar(Component.text("World is not tracked by GriefProt."));
+                }
                 continue;
             }
 
             if (mode == Mode.REINFORCEMENT) {
                 showReinforcement(player, block, world);
-            } else {
+            } else if (mode == Mode.SHIELD) {
                 showShield(player, block, world);
+            } else {
+                showDetails(player, block, world);
             }
         }
+    }
+
+    private void showDetails(Player player, Block block, GriefWorld world) {
+        int[] durability = new int[FACES.size()];
+        for (int i = 0; i < FACES.size(); i++) {
+            int face = plugin.faces().toAbi(FACES.get(i));
+            durability[i] = world.abi().reinfFaceDurability(
+                    world.handle(), block.getX(), block.getY(), block.getZ(), face);
+        }
+        int shield = world.abi().pointsGet(world.handle(), block.getX(), block.getY(), block.getZ());
+        player.sendActionBar(Component.text(detailsText(block.getX(), block.getY(), block.getZ(), durability, shield)));
+    }
+
+    static String detailsText(int x, int y, int z, int[] durability, int shieldPoints) {
+        if (durability.length != FACES.size()) {
+            throw new IllegalArgumentException("expected durability for all six block faces");
+        }
+        List<String> entries = new ArrayList<>(FACES.size());
+        for (int i = 0; i < FACES.size(); i++) {
+            entries.add(faceShortName(FACES.get(i)) + ":" + durability[i]);
+        }
+        return "Block " + x + "," + y + "," + z + " | " + String.join(" ", entries)
+                + " | shield:" + shieldPoints;
+    }
+
+    private static String faceShortName(BlockFace face) {
+        return switch (face) {
+            case DOWN -> "D";
+            case UP -> "U";
+            case NORTH -> "N";
+            case SOUTH -> "S";
+            case WEST -> "W";
+            case EAST -> "E";
+            default -> throw new IllegalArgumentException("not a block face: " + face);
+        };
     }
 
     private void showReinforcement(Player player, Block block, GriefWorld world) {
@@ -206,7 +252,8 @@ public final class DebugOverlay extends BukkitRunnable implements CommandExecuto
 
     private enum Mode {
         REINFORCEMENT,
-        SHIELD
+        SHIELD,
+        DETAILS
     }
 
 }

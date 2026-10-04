@@ -8,7 +8,7 @@ load: POSTWORLD
 commands:
   griefprot:
     description: Toggle a targeted protection debug overlay.
-    usage: /griefprot overlay <reinforcement|shield|off>
+    usage: /griefprot overlay <reinforcement|shield|details|off>
     permission: griefprot.debug
 permissions:
   griefprot.debug:

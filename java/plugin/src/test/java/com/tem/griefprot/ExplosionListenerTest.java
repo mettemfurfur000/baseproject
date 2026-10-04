@@ -4,9 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
+import org.bukkit.util.Vector;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -36,32 +40,49 @@ class ExplosionListenerTest {
     }
 
     @Test
-    @DisplayName("a protected block hit between the blast and target occludes the target")
-    void protectedBlockShieldsBlocksBehindIt() {
-        UUID world = UUID.randomUUID();
-        ExplosionListener.BlockPosition target = new ExplosionListener.BlockPosition(world, 2, 64, 0);
-        ExplosionListener.BlockPosition protectedBlock = new ExplosionListener.BlockPosition(world, 1, 64, 0);
+    @DisplayName("a ray leaving an integer boundary in the negative direction advances immediately")
+    void rayLeavesNegativeVoxelImmediately() {
+        Location origin = new Location(null, 4.0, 64.5, 0.5);
+        Vector direction = new Vector(-1.0, 0.0, 0.0);
 
-        assertTrue(ExplosionListener.isProtectedObstruction(target, protectedBlock, Set.of(protectedBlock)));
+        assertEquals(0.0, ExplosionListener.distanceToCellExit(origin, direction));
     }
 
     @Test
-    @DisplayName("a target is not considered its own protected obstruction")
-    void targetIsNotItsOwnObstruction() {
-        UUID world = UUID.randomUUID();
-        ExplosionListener.BlockPosition target = new ExplosionListener.BlockPosition(world, 2, 64, 0);
+    @DisplayName("a ray inside a voxel advances to the next boundary in its travel direction")
+    void rayAdvancesToNextVoxelBoundary() {
+        Location origin = new Location(null, 4.25, 64.5, 0.5);
+        Vector direction = new Vector(-1.0, 0.0, 0.0);
 
-        assertFalse(ExplosionListener.isProtectedObstruction(target, target, Set.of(target)));
+        assertEquals(0.25, ExplosionListener.distanceToCellExit(origin, direction), 1.0e-9);
     }
 
     @Test
-    @DisplayName("an ordinary intervening block does not count as protection occlusion")
-    void unprotectedBlockDoesNotOcclude() {
-        UUID world = UUID.randomUUID();
-        ExplosionListener.BlockPosition target = new ExplosionListener.BlockPosition(world, 2, 64, 0);
-        ExplosionListener.BlockPosition obstruction = new ExplosionListener.BlockPosition(world, 1, 64, 0);
+    @DisplayName("a ray crossing a block from west to east checks its east exit face")
+    void rayChecksOppositeFaceWhenLeavingBlock() {
+        assertEquals(
+                List.of(BlockFace.EAST),
+                ExplosionListener.exitFaces(new Vector(0.0, 64.5, 0.5), new Vector(1.0, 0.0, 0.0), 0, 64, 0));
+    }
 
-        assertFalse(ExplosionListener.isProtectedObstruction(target, obstruction, Set.of()));
+    @Test
+    @DisplayName("a ray exiting exactly at an edge checks both crossed faces")
+    void rayChecksBothFacesAtEdgeExit() {
+        assertEquals(
+                List.of(BlockFace.EAST, BlockFace.UP),
+                ExplosionListener.exitFaces(new Vector(0.0, 64.0, 0.5), new Vector(1.0, 1.0, 0.0), 0, 64, 0));
+    }
+
+    @Test
+    @DisplayName("one explosion consumes a given protected face at most once")
+    void protectedFaceHitIsDeduplicatedPerExplosion() {
+        UUID world = UUID.randomUUID();
+        ExplosionListener.BlockPosition block = new ExplosionListener.BlockPosition(world, -217, 79, 67);
+        Set<ExplosionListener.FacePosition> hits = new HashSet<>();
+
+        assertTrue(ExplosionListener.markFaceHit(hits, block, BlockFace.EAST));
+        assertFalse(ExplosionListener.markFaceHit(hits, block, BlockFace.EAST));
+        assertTrue(ExplosionListener.markFaceHit(hits, block, BlockFace.UP));
     }
 
 }

@@ -74,8 +74,23 @@ Explosions use that same resolution for each affected block. The face nearest
 the explosion origin is checked first; reinforcement absorbs the hit before
 shield points. A protected block is removed from the explosion's affected list,
 so the explosion can still damage other blocks normally. When a ray to a block
-first hits another block that survived the explosion check, the target is
-removed as well.
+crosses a reinforced entry or exit face on any intervening block, that face
+loses durability and the target is removed from the explosion's affected list.
+Rays continue through unreinforced faces and blocks.
+
+Direct hits follow the break resolver's durability rule: a face protects the
+target while durability remains after the hit. Spending its final point allows
+the target block to break unless shield points absorb that break. An intervening
+reinforced face still absorbs that ray for the current explosion, even when the
+hit spends its final point.
+
+Explosion diagnostics are currently written to the server log under
+`[explosion-audit:<id>]`. Each entry records target coordinates, traversed
+blocks and faces, durability consumed, and the resolver decision. A next-tick
+entry reports whether each candidate block actually broke and its face/shield
+values before and after; surviving faces that drop below 31 are also called out
+with their ray cause. A reinforced face can absorb at most one ray hit per
+explosion, even if several target rays cross the same face.
 
 ## Debug overlays
 
@@ -84,7 +99,10 @@ Operators can inspect the block under their crosshair (up to 8 blocks away) with
 outlines; their color moves from red at zero durability through the copper tier
 to green at the iron tier. Use `/griefprot overlay shield` for a separate blue
 wireframe when the target has shield points, or `/griefprot overlay off` to stop.
-Only one overlay can be active per player at a time.
+Use `/griefprot overlay details` to show the targeted block's coordinates,
+durability on all six faces, and shield points in the action bar. This makes it
+possible to compare the values before and after an explosion. Only one overlay
+can be active per player at a time.
 
 ## Storage
 
